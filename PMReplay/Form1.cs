@@ -36,7 +36,7 @@ namespace PMReplay
 
         Label FindSpecificLabel(String controlName)
         {
-            var res = from lbl in grpHandDisplay.Controls.OfType<Label>()
+            var res = from lbl in pnlTable.Controls.OfType<Label>()
                       where lbl.Name == controlName
                       select lbl;
             Label firstLbl = res.First();
@@ -265,7 +265,7 @@ namespace PMReplay
                     string cardNumber = cardPosition.Substring(3, 1);
                     string pbName = $"pbPlayer{seatNumber}Card{cardNumber}";
 
-                    var res = from pb in grpHandDisplay.Controls.OfType<PictureBox>()
+                    var res = from pb in pnlTable.Controls.OfType<PictureBox>()
                               where pb.Name == pbName
                               select pb;
                     PictureBox pictureBox = res.First();
@@ -706,7 +706,7 @@ namespace PMReplay
         {
             // set the tag property to indicate which card should be displayed in the picturebox
             // when ShowHoleCards is called
-            var res = from pb in grpHandDisplay.Controls.OfType<PictureBox>()
+            var res = from pb in pnlTable.Controls.OfType<PictureBox>()
                       where pb.Name.Contains($"pbPlayer{seatNumber}")
                       select pb;
 
@@ -730,7 +730,7 @@ namespace PMReplay
         {
             // pass a seat number if you want to show 1 players hand (typically at showdown)
             // else this query will return all the lblSeatPlayer labels
-            var res = from lbl in grpHandDisplay.Controls.OfType<Label>()
+            var res = from lbl in pnlTable.Controls.OfType<Label>()
                       where lbl.Name.Contains($"lblSeatPlayer{seatNum}")
                       select lbl;
 
@@ -750,7 +750,7 @@ namespace PMReplay
         private void PlayerFoldsHideCardImages(String seatNumber)
         {
             // hide the players cards when they fold 
-            var res = from pb in grpHandDisplay.Controls.OfType<PictureBox>()
+            var res = from pb in pnlTable.Controls.OfType<PictureBox>()
                       where pb.Name.Contains($"pbPlayer{seatNumber}")
                       select pb;
 
@@ -926,7 +926,7 @@ namespace PMReplay
         private void ClearTableInfo()
         {
             // hide and/or clear information from previously displayed hand
-            foreach (Control c in grpHandDisplay.Controls)
+            foreach (Control c in pnlTable.Controls)
             {
                 if (c.Name.Contains("lblSeatPosition") || c.Name.Contains("lblSeatPlayer")
                     || c.Name.Contains("lblStackSize") || c.Name.Contains("Card"))
@@ -976,7 +976,7 @@ namespace PMReplay
             {
                 ResetTable();
 
-                grpHandDisplay.Visible = true;
+                pnlTable.Visible = true;
                 lblGameType.Visible = true;
                 lblPotTitle.Visible = true;
 
@@ -991,9 +991,5 @@ namespace PMReplay
 
         }
 
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
     }
 }
