@@ -396,7 +396,7 @@ namespace PMReplay
 
                 if (line.Contains("wins") || line.Contains("splits"))
                 {
-                    // encountered the line that indicates a player has won the pot
+                    // encountered the line that indicates a player(s) has won the pot
                     handIsfinished = true;
 
                     string _PlayerName = line.Substring(0, (line.IndexOf(' ')));
@@ -551,7 +551,7 @@ namespace PMReplay
 
                                         if (line.Contains("adds"))
                                         {
-                                            // player add-on to their stack
+                                            // player adds-on to their stack
                                             UpdateStackSizeForSeat(seatNumber, amountToPot, "add");
                                         }
                                         else
@@ -583,7 +583,8 @@ namespace PMReplay
                             {
                                 if (summaryLineReached)
                                 {
-                                    // set the hole cards for each player
+                                    // if "seat" is found after the summary line then 
+                                    // this tells you what each player's cards were so set the hole cards for each player
                                     if (line.Contains("Seat"))
                                     {
                                         seatNumber = line.Substring(5, 1);
@@ -599,7 +600,8 @@ namespace PMReplay
                     {
                         if (summaryLineReached)
                         {
-                            // set the hole cards for each player
+                            // if "seat" is found after the summary line then 
+                            // this tells you what each player's cards were so set the hole cards for each player
                             if (line.Contains("Seat"))
                             {
                                 seatNumber = line.Substring(5, 1);
@@ -702,7 +704,8 @@ namespace PMReplay
 
         private void SetPictureBoxTag(String seatNumber, String HoleCards)
         {
-            // using the tag property to indicate which card should be displayed 
+            // set the tag property to indicate which card should be displayed in the picturebox
+            // when ShowHoleCards is called
             var res = from pb in grpHandDisplay.Controls.OfType<PictureBox>()
                       where pb.Name.Contains($"pbPlayer{seatNumber}")
                       select pb;
@@ -805,6 +808,8 @@ namespace PMReplay
 
         private String CardImageName(String value)
         {
+            // builds the path to the image to be used then the cards are shown
+            // either on the board or in the players hand
             String directory = AppDomain.CurrentDomain.BaseDirectory;
             String CardImagePath = $"{directory}images\\cards\\";
                         
@@ -848,7 +853,8 @@ namespace PMReplay
 
         private void BuildDeck()
         {
-
+            // creating an array of card objects that is the value of the card (ex: 4h) and the image associated
+            // with the card value
             this.deck = new Card[52];
             String cardValue;
 
@@ -923,7 +929,7 @@ namespace PMReplay
             foreach (Control c in grpHandDisplay.Controls)
             {
                 if (c.Name.Contains("lblSeatPosition") || c.Name.Contains("lblSeatPlayer")
-                    || c.Name.Contains("lblStackSize") || c.Name.Contains("pbPlayer"))
+                    || c.Name.Contains("lblStackSize") || c.Name.Contains("Card"))
                 {
                     if (c is Label) { c.Text = ""; }
                     c.Visible = false;
@@ -938,13 +944,6 @@ namespace PMReplay
 
             lbHandAction.Items.Clear();
             lbHandAction.Visible = false;
-
-            pbFlopCard1.Visible = false;
-            pbFlopCard2.Visible = false;
-            pbFlopCard3.Visible = false;
-
-            pbTurnCard.Visible = false;
-            pbRiverCard.Visible = false;
 
             lblThePot.Text = "";
 
