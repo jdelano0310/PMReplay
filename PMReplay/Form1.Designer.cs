@@ -31,7 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.dlgHandHistory = new System.Windows.Forms.OpenFileDialog();
             this.label1 = new System.Windows.Forms.Label();
-            this.grpHandDisplay = new System.Windows.Forms.GroupBox();
+            this.grpHandDisplay = new System.Windows.Forms.Panel();
             this.btnNext = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.lblPotTitle = new System.Windows.Forms.Label();
@@ -190,7 +190,6 @@
             this.grpHandDisplay.Controls.Add(this.lblSeatPlayer3);
             this.grpHandDisplay.Controls.Add(this.lblSeatPlayer2);
             this.grpHandDisplay.Controls.Add(this.lblSeatPlayer1);
-            this.grpHandDisplay.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.grpHandDisplay.Location = new System.Drawing.Point(6, 36);
             this.grpHandDisplay.Name = "grpHandDisplay";
             this.grpHandDisplay.Size = new System.Drawing.Size(952, 539);
@@ -827,7 +826,7 @@
 
         private System.Windows.Forms.OpenFileDialog dlgHandHistory;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.GroupBox grpHandDisplay;
+        private System.Windows.Forms.Panel grpHandDisplay;
         private System.Windows.Forms.Label lblSeatPlayer6;
         private System.Windows.Forms.Label lblSeatPlayer9;
         private System.Windows.Forms.Label lblSeatPlayer8;
