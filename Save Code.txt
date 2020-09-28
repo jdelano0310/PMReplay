@@ -1,0 +1,206 @@
+        private class HandAction
+        {
+            public SeatAction When { set; get; }
+            public String Description { set; get; }
+        }
+
+        enum SeatAction
+        {
+            PreDeal,
+            PreFlop,
+            onTheFlop,
+            onTheTurn,
+            onTheRiver
+        }
+        private class Seat
+        {
+            public String Number { set; get; }
+            public String PlayerName { set; get; }
+            public double StackSize { set; get; }
+            public List<Card> HoldCards { set; get; }
+            public String Position { set; get; }
+            public String Result { set; get; }
+        }
+
+
+
+            bool processedSeats = false;
+            bool processedPreDeal = false;
+            bool processedPreFlop = false;
+            bool processedOnTheFlop = false;
+            bool processedOnTheTurn = false;
+            bool processedOnTheRiver = false;
+
+            bool handIsfinished = false;
+
+            List<HandAction> handAction = new List<HandAction>();
+            Hand currentHand = new Hand();
+            currentHand.HandNumber = currentHandNumber;
+            currentHand.HandTime = handTime;
+
+            foreach (String line in lines )
+            {
+
+		if (line.Contains("Game"))
+                    {
+                        game = line.Substring(5);
+                    } else if (siteName.Length == 0 && line.Contains("Site"))
+                        {
+                            siteName = line.Substring(5);
+                        } else if (tableName.Length == 0 && line.Contains("Table"))
+                            {
+                                tableName = line.Substring(7);
+                            }
+                else
+
+                if (line.Contains("Seat"))
+                {
+                    // add a seat information to the hand
+                    if (currentHand.Seats == null)
+                    {
+                        currentHand.Seats = new Seat[0];
+                    }
+
+                    Seat seat = new Seat
+                    {
+                        Number = line.Substring(5, 1),
+                        PlayerName = line.Substring(7, (line.Substring(7).IndexOf("(") - 6)),
+                        // StackSize = double.Parse(line.Substring(line.IndexOf("(") + 1, line.IndexOf(")") - line.IndexOf("(") + 1))
+                        StackSize = double.Parse(FindStringInBetween(line, '(', ')'))
+                    };
+                    currentHand.Seats.Append(seat);
+                } else
+                {
+                    // done looping through seat data
+                    if (!processedSeats && currentHand.Seats.Length > 0)
+                    {
+                        processedSeats = true;
+                    }
+                }
+
+                if (!line.Contains("** Hole Cards **") && processedSeats && !processedPreDeal)
+                {
+                    // preDeal - player position (who is the Button, SB, and BB)
+                    
+                    String preDealPlayer = line.Substring(0, line.IndexOf(' ') - 1);
+                    String preDealPlayerPosition = line.Contains("dealer") ? "B" : line.Contains("small") ? "SB" : line.Contains("big") ? "BB" : "NF";
+                    bool bbPostionFilled = false; 
+
+                    foreach (Seat seat in currentHand.Seats)
+                    {
+                        if (seat.PlayerName == preDealPlayer)
+                        {
+                            if (preDealPlayerPosition=="BB" && !bbPostionFilled)
+                            {
+                                bbPostionFilled = true;
+                            } else if (preDealPlayerPosition == "BB" && bbPostionFilled)
+                            {
+                                // there is already a BB position, Poker Mavens marks a straddle as another BB
+                                preDealPlayerPosition = "ST";
+                            }
+                            
+                            if (seat.Position.Length>0)
+                            {
+                                // in heads up a player is both the dealer and the small blind
+                                preDealPlayerPosition += $"{seat.Position}/{preDealPlayerPosition}";
+                            }
+
+                            seat.Position = preDealPlayerPosition;
+
+                            HandAction hndAction = new HandAction
+                            {
+                                When = SeatAction.PreDeal,
+                                Description = line
+                            };
+                            handAction.Add(hndAction);
+                        }
+                    }
+                } else if (line.Contains("** Hole Cards **"))
+                {
+                    // reaching this line means we're done with the preDeal information
+                    processedPreDeal = true;
+                    currentHand.PlayersToFlop = FindStringInBetween(line, '[', ']');
+                }
+
+                if (processedPreDeal && !processedPreFlop)
+                {
+                    HandAction hndAction = new HandAction
+                    {
+                        When = SeatAction.PreFlop,
+                        Description = line
+                    };
+                    handAction.Add(hndAction);
+                }
+
+                if (line.Contains("wins"))
+                {
+                    handIsfinished = true;
+                }
+
+                if (!handIsfinished)
+                {
+                    if (line.Contains("Flop")) { 
+                        processedPreFlop = true;
+                    }
+
+                    if (processedPreFlop && !processedOnTheFlop)
+                    {
+                        HandAction hndAction = new HandAction
+                        {
+                            When = SeatAction.onTheFlop,
+                            Description = line
+                        };
+                        handAction.Add(hndAction);
+                    }
+
+                }
+
+            }
+
+            // add the hand to the hands collection
+            hands.Add(currentHand); 
+
+        private void ReadHandHistoryFile(String filename)
+        {
+            string[] lines = System.IO.File.ReadAllLines(@filename);
+            List<string> handLines = new List<string>();
+                        
+            hands = new List<Hand>();
+
+            // Display the file contents by using a foreach loop.
+            lbHands.Items.Clear();
+            foreach (string line in lines)
+            {
+                if (line.Contains("Hand #")) {
+                    // only add the hand line from the text file to the listbox
+                    lbHands.Items.Add(line.Substring(6));
+
+                    if (currentHandNumber > 0)
+                    {
+                        BuildHandInfo(handLines);
+                        handLines.Clear();
+                    }
+
+                    currentHandNumber = int.Parse(line.Substring(6).Split('-')[1]);
+                    handTime = $"{line.Substring(6).Split(' ')[2]} {line.Substring(6).Split(' ')[3]}";
+                }
+                else if (game.Length == 0 && line.Contains("Game"))
+                    {
+                        game = line.Substring(5);
+                    } else if (siteName.Length == 0 && line.Contains("Site"))
+                        {
+                            siteName = line.Substring(5);
+                        } else if (tableName.Length == 0 && line.Contains("Table"))
+                            {
+                                tableName = line.Substring(7);
+                            }
+                else
+                {
+                    // save each line of the hand history for use later
+                    handLines.Add(line);
+                }
+            }
+
+            lines = null;
+            label1.Text = $"Found {lbHands.Items.Count} hands";
+        }
