@@ -134,6 +134,15 @@ namespace PMReplay
             Label lblStackSize = FindSpecificLabel($"lblStackSize{SeatNumber}");
 
             lblPlayerName.Text = SittingOut ? $"{PlayerName} SO" : PlayerName;
+            if (SittingOut)
+            {
+                lblPlayerName.BackColor = Color.Gray;
+            } else
+            {
+                lblPlayerName.BackColor = Color.Khaki;
+            }
+
+
             lblStackSize.Text = PlayerStack;
 
             lblPlayerName.Visible = true;
@@ -217,7 +226,7 @@ namespace PMReplay
         private void AddLineToHandActionListbox(string lineToAdd)
         {
             // if it is a chat line, don't put it in the box let the bubble display it
-            if (lineToAdd.Contains(": \"")) { return; }
+            //if (lineToAdd.Contains(": \"")) { return; }
 
             // add the line to the listbox and then highlite it so the line is in view
             lbHandAction.Items.Add(lineToAdd);
@@ -307,6 +316,7 @@ namespace PMReplay
             if (lblPrevChat != null)
             {
                 lblPrevChat.Visible = false;
+                lblPrevChat.Dispose();
             }
         }
 
@@ -316,16 +326,17 @@ namespace PMReplay
             string seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
 
             Label lblPlayerSeat = FindSpecificLabel($"lblSeatPlayer{seatNumber}");
-
+            
             String chatMessage = chatLine.Substring(chatLine.IndexOf(":") + 3).Replace("\"","");
 
-            int leftPositionAdjustment = int.Parse(seatNumber) < 6 ? 75 : 0;
+            int leftPositionAdjustment = int.Parse(seatNumber) < 6 ? 72 : 0;
             Label lblChatBubble = new Label()
             {
                 AutoSize = true,
+                Font = new Font("Arial", 9),
                 Padding = new Padding(3),
                 Text = chatMessage,
-                Top = lblPlayerSeat.Top - 25,
+                Top = lblPlayerSeat.Top - 26, // align it with where the cards are
                 Left = lblPlayerSeat.Left - leftPositionAdjustment,
                 Visible=true,
                 BackColor = Color.LightBlue,
@@ -383,7 +394,7 @@ namespace PMReplay
                     };
 
                     NextButtonClicked = false;
-
+                    HidePreviousChatBubble();
                 }
 
                 if (UserClickedClose)
@@ -392,7 +403,6 @@ namespace PMReplay
                     break;
                 }
 
-                HidePreviousChatBubble();
                 if (line.Contains(": \""))
                 {
                     // a chat line, display the chat over the players area
@@ -419,7 +429,7 @@ namespace PMReplay
                     seatNumber = line.Substring(5, 1);
                     string _PlayerName = line.Substring(8, (line.Substring(8).IndexOf("(") - 1));
                     string _StackSize = $"${FindStringInBetween(line, '(', ')')}";
-                    bool _PlayerSittingOut = line.Contains("sitting out");
+                    bool _PlayerSittingOut = line.Contains("sitting out") || line.Contains("waiting for big blind");
 
                     PlayersSeatNumber[int.Parse(seatNumber)] = _PlayerName;
 
@@ -552,7 +562,7 @@ namespace PMReplay
                             seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
 
                             UpdateStackSizeForSeat(seatNumber, amountFromPot, "add");
-                            AddLineToHandActionListbox($"Bet not called returned to {_PlayerName}");
+                            AddLineToHandActionListbox($"{_PlayerName} is refunded {double.Parse(amountFromPot).ToString("C2")}");
 
                         }
                         else if (line.Contains("folds"))
@@ -626,7 +636,6 @@ namespace PMReplay
                                 else
                                 {
                                     AddLineToHandActionListbox(line);
-                                    //moneyLine = "";
                                 }
 
                                 if (line.Contains("shows"))
@@ -720,7 +729,6 @@ namespace PMReplay
                                 else
                                 {
                                     AddLineToHandActionListbox(line);
-                                    //moneyLine = "";
                                 }
 
                                 if (line.Contains("shows"))
@@ -734,6 +742,7 @@ namespace PMReplay
                         }
                     }
                 }
+                GC.Collect();
             }
             ShowHoleCards("");
             btnNext.Visible = false;
