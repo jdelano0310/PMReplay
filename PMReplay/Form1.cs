@@ -39,8 +39,16 @@ namespace PMReplay
             var res = from lbl in pnlTable.Controls.OfType<Label>()
                       where lbl.Name == controlName
                       select lbl;
-            Label firstLbl = res.First();
 
+            Label firstLbl;
+            try
+            {
+                firstLbl = res.First();
+            } catch
+            {
+                firstLbl = null;
+            }
+            
             return firstLbl;
         }
 
@@ -89,7 +97,7 @@ namespace PMReplay
                 else
                 {
                     // save each line of the hand history for use if the user selects it from the list
-                    handLines.Add(line);
+                    if (currentHandNumber != 0) { handLines.Add(line); }
                 }
             }
 
@@ -208,6 +216,9 @@ namespace PMReplay
 
         private void AddLineToHandActionListbox(string lineToAdd)
         {
+            // if it is a chat line, don't put it in the box let the bubble display it
+            if (lineToAdd.Contains(": \"")) { return; }
+
             // add the line to the listbox and then highlite it so the line is in view
             lbHandAction.Items.Add(lineToAdd);
             lbHandAction.SelectedIndex = lbHandAction.Items.Count - 1;
@@ -290,6 +301,44 @@ namespace PMReplay
             }
         }
 
+        private void HidePreviousChatBubble()
+        {
+            Label lblPrevChat = FindSpecificLabel("lblDisplayChat");
+            if (lblPrevChat != null)
+            {
+                lblPrevChat.Visible = false;
+            }
+        }
+
+        private void DisplayChatBubble(String chatLine)
+        {
+            string _PlayerName = chatLine.Substring(0, (chatLine.IndexOf(' ') -1));
+            string seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
+
+            Label lblPlayerSeat = FindSpecificLabel($"lblSeatPlayer{seatNumber}");
+
+            String chatMessage = chatLine.Substring(chatLine.IndexOf(":") + 3).Replace("\"","");
+
+            int leftPositionAdjustment = int.Parse(seatNumber) < 6 ? 75 : 0;
+            Label lblChatBubble = new Label()
+            {
+                AutoSize = true,
+                Padding = new Padding(3),
+                Text = chatMessage,
+                Top = lblPlayerSeat.Top - 25,
+                Left = lblPlayerSeat.Left - leftPositionAdjustment,
+                Visible=true,
+                BackColor = Color.LightBlue,
+                ForeColor = Color.Navy,
+                Name = "lblDisplayChat",
+            };
+
+            pnlTable.Controls.Add(lblChatBubble);
+            lblChatBubble.BringToFront();
+            Application.DoEvents();
+
+        }
+
         private void ShowHand(int HandNumber)
         {
             String seatNumber = "";
@@ -326,6 +375,8 @@ namespace PMReplay
                     !NextButtonClicked && !summaryLineReached &&
                     !line.Contains("refund") && !line.Contains("Pot Show Down"))
                 {
+                    // waiting for the user to click the next button which will change NextButtonClicked to true
+                    // jumping out of this wait loop to continue reading the had history file
                     while (!NextButtonClicked && !UserClickedClose)
                     {
                         Application.DoEvents();
@@ -339,6 +390,13 @@ namespace PMReplay
                 {
                     // the user has clicked the form's red x - jump out of the display hand loop
                     break;
+                }
+
+                HidePreviousChatBubble();
+                if (line.Contains(": \""))
+                {
+                    // a chat line, display the chat over the players area
+                    DisplayChatBubble(line);
                 }
 
                 if (line.Contains("Game"))
@@ -954,7 +1012,7 @@ namespace PMReplay
         bool NextButtonClicked = false;
         private void btnNext_Click(object sender, EventArgs e)
         {
-            if (cboHands.SelectedIndex > 0)
+            if (cboHands.SelectedIndex > -1)
             {
                 // user clicked the next button which jumps out of a waiting loop in the showhand routine to 
                 // show the next event that occurs in the hand
