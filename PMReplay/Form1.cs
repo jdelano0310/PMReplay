@@ -34,6 +34,10 @@ namespace PMReplay
         Card[] deck;
         String backOfCardImageFile = "";
 
+        private List<Hand> hands;
+        String[] PlayersSeatNumber;
+        double[] PlayersPrevBet = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
         Label FindSpecificLabel(String controlName)
         {
             var res = from lbl in pnlTable.Controls.OfType<Label>()
@@ -68,10 +72,6 @@ namespace PMReplay
 
             return pbCards;
         }
-
-        private List<Hand> hands;
-        String[] PlayersSeatNumber;
-        double[] PlayersPrevBet = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
         private void ReadHandHistoryFile(String filename)
         {
