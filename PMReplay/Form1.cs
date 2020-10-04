@@ -52,6 +52,23 @@ namespace PMReplay
             return firstLbl;
         }
 
+        PictureBox[] FindSeatCards(String seatNumber)
+        {
+            PictureBox[] pbCards = new PictureBox[2];
+            var res = from pbs in pnlTable.Controls.OfType<PictureBox>()
+                      where pbs.Name.Contains($"pbPlayer{seatNumber}Card")
+                      select pbs;
+
+            int x = 0;
+            foreach (PictureBox pb in res)
+            {
+                pbCards[x] = pb;
+                x += 1;
+            }
+
+            return pbCards;
+        }
+
         private List<Hand> hands;
         String[] PlayersSeatNumber;
         double[] PlayersPrevBet = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
@@ -173,16 +190,34 @@ namespace PMReplay
             }
         }
 
-        Label lblLastHighlightedPlayer;
+        String LastHighlightedSeat = "";
         private void HighlightActionOnSeat(String SeatNumber)
         {
-            if (lblLastHighlightedPlayer != null)
+
+            PictureBox[] pbs;
+            if (LastHighlightedSeat.Length > 0)
             {
-                lblLastHighlightedPlayer.BackColor = Color.Khaki;
+                // reset the previously highlighted seat
+                pbs = FindSeatCards(LastHighlightedSeat);
+
+                foreach (PictureBox pb in pbs)
+                {
+                    pb.BackColor = Color.White;
+                    pb.Padding = new Padding(0, 0, 0, 0);
+                }
             }
 
-            lblLastHighlightedPlayer = FindSpecificLabel($"lblSeatPlayer{SeatNumber}");
-            lblLastHighlightedPlayer.BackColor = Color.Yellow;
+            // highlighted seat with the action
+            pbs = FindSeatCards(SeatNumber);
+            
+            foreach (PictureBox pb in pbs)
+            {
+                pb.BackColor = Color.Yellow;
+                pb.Padding = new Padding(2, 2, 2, 2);
+
+            }
+
+            LastHighlightedSeat = SeatNumber;
         }
 
         private void UpdateStackSizeForSeat(String SeatNumber, String amount, String math, String HandActionline = "")
@@ -303,6 +338,10 @@ namespace PMReplay
 
                         pictureBox.Image = image;
                         pictureBox.Visible = true;
+
+                        // reset the action is on this player once the cards are shown
+                        pictureBox.BackColor = Color.White;
+                        pictureBox.Padding = new Padding(0, 0, 0, 0);
                     }
                     catch { }
 
@@ -329,6 +368,8 @@ namespace PMReplay
             
             String chatMessage = chatLine.Substring(chatLine.IndexOf(":") + 3).Replace("\"","");
 
+            // seats 1-5 move the bubble to the left to align with the 1st card
+            // 6-9 keep it at the default location
             int leftPositionAdjustment = int.Parse(seatNumber) < 6 ? 72 : 0;
             Label lblChatBubble = new Label()
             {
