@@ -1023,6 +1023,7 @@ namespace PMReplay
             try
             {
                 BuildDeck();
+                AssignPlayerNameLabelDoubleClick();
             } catch (Exception ex)
             {
                 MessageBox.Show($"Unable to build the deck of cards.\n\nError message: {ex.Message}");
@@ -1099,6 +1100,7 @@ namespace PMReplay
 
         }
 
+        int numberOfHandsPlayed = 0;
         private void CalculatePlayerStackMovement(String seatNumber, String playerName)
         {
             // for the entire session, show the selected player's stack size change hand by hand
@@ -1108,6 +1110,8 @@ namespace PMReplay
             double playerStack = 0;
             bool summaryLineReached = false;
             String seatName = $"Seat {seatNumber}";
+            double totalAddOns = 0;
+            numberOfHandsPlayed = 0;
 
             foreach (Hand hand in hands) {
                 potShow = false;
@@ -1127,8 +1131,9 @@ namespace PMReplay
                     if (line.Contains(seatName) && !summaryLineReached)
                     {
                         // set the starting stack for the hand
-                        string _StackSize = $"${FindStringInBetween(line, '(', ')')}";
+                        string _StackSize = FindStringInBetween(line, '(', ')');
                         playerStack = double.Parse(_StackSize);
+                        numberOfHandsPlayed += 1;
                     }
 
                     if (line.Contains("Pot Show Down"))
@@ -1219,6 +1224,7 @@ namespace PMReplay
                             if (line.Contains("adds"))
                             {
                                 // player adds-on to their stack
+                                totalAddOns += amountToPot;
                                 playerStack += amountToPot;
                             }
                             else
@@ -1235,6 +1241,37 @@ namespace PMReplay
                     GC.Collect();
                     Application.DoEvents();
                 }
+                
+            }
+            MessageBox.Show($"{playerName} played {numberOfHandsPlayed} hands with total add-ons of {totalAddOns:C2}");
+        }
+
+        private void SeatPlayer_DoubleClick(object sender, EventArgs e)
+        {
+            string lblName = ((Label)sender).Name;
+            string playerName = ((Label)sender).Text;
+            string seatNumber = lblName.Substring(lblName.Length - 1);
+            try
+            {
+                CalculatePlayerStackMovement(seatNumber, playerName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to calculate.\n\n on hand {numberOfHandsPlayed} \n\nError message: {ex.Message}\n\n" +
+                    $"Details:\n\n{ex.StackTrace}");
+            }
+        }
+
+        private void AssignPlayerNameLabelDoubleClick()
+        {
+            // allows for double clicking a player name to build stack size graph
+            string lblName = "lblSeatPlayer";
+            Label lbl;
+
+            for (int i = 1; i < 10; i++)
+            {
+                lbl = FindSpecificLabel($"{lblName}{i}");
+                lbl.DoubleClick += SeatPlayer_DoubleClick;
             }
         }
     }
