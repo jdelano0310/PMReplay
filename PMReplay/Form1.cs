@@ -130,7 +130,7 @@ namespace PMReplay
             hands.Add(currentHand);
             handLines.Clear();
 
-            hands.Add(currentHand);
+            //hands.Add(currentHand);
 
             label1.Text = $"{cboHands.Items.Count} hands";
         }
@@ -1105,7 +1105,10 @@ namespace PMReplay
         private void CalculatePlayerStackMovement(String seatNumber, String playerName)
         {
             // for the entire session, show the selected player's stack size change hand by hand
-            Global.playerStack = new double[int.Parse(label1.Text)];
+            DisplayChatBubble($"{playerName}: Loading stack size data");
+
+            string numberOfHandsInFile = label1.Text.Substring(0, label1.Text.IndexOf(' '));
+            Global.playerStack = new double[int.Parse(numberOfHandsInFile) + 1];
             bool potShow = false;
 
             string _PlayerName;
@@ -1247,9 +1250,13 @@ namespace PMReplay
 
             }
             //MessageBox.Show($"{playerName} played {numberOfHandsPlayed} hands with total add-ons of {totalAddOns:C2}");
-            
-            //show form2 with the chart
 
+            //show form2 with the chart
+            HidePreviousChatBubble();
+            this.UseWaitCursor = false;
+            Form2 frmChart = new Form2();
+            frmChart.Text = $"{playerName}'s stack history";
+            frmChart.ShowDialog();
             
         }
 
@@ -1260,10 +1267,13 @@ namespace PMReplay
             string seatNumber = lblName.Substring(lblName.Length - 1);
             try
             {
+                this.UseWaitCursor = true;
+                Application.DoEvents();
                 CalculatePlayerStackMovement(seatNumber, playerName);
             }
             catch (Exception ex)
             {
+                this.UseWaitCursor = false;
                 MessageBox.Show($"Unable to calculate.\n\n on hand {numberOfHandsPlayed} \n\nError message: {ex.Message}\n\n" +
                     $"Details:\n\n{ex.StackTrace}");
             }

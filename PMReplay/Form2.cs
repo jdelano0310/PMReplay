@@ -20,7 +20,7 @@ namespace PMReplay
 
         private void Form2_Load(object sender, EventArgs e)
         {
-
+            BuildSplineChart();
         }
 
         private void BuildSplineChart()
@@ -28,15 +28,19 @@ namespace PMReplay
             StackChart.Series.Clear();
 
             StackChart.Titles.Add("Stack History");
+            StackChart.ChartAreas[0].AxisX.Title = "Hand Number";
+            StackChart.ChartAreas[0].AxisY.Title = "Dollars";
 
             Series series = StackChart.Series.Add("Stack Amount");
             series.ChartType = SeriesChartType.Spline;
-            series.Points.AddXY("September", 100);
-            series.Points.AddXY("Obtober", 300);
-            series.Points.AddXY("November", 800);
-            series.Points.AddXY("December", 200);
-            series.Points.AddXY("January", 600);
-            series.Points.AddXY("February", 400);
+            
+            int handNumber = 0;
+            foreach (double handstack in Global.playerStack)
+            {
+                handNumber += 1;
+                series.Points.AddXY(handNumber, handstack);
+            }
+
         }
     }
 }
