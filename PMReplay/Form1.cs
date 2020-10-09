@@ -1101,9 +1101,11 @@ namespace PMReplay
         }
 
         int numberOfHandsPlayed = 0;
+        
         private void CalculatePlayerStackMovement(String seatNumber, String playerName)
         {
             // for the entire session, show the selected player's stack size change hand by hand
+            Global.playerStack = new double[int.Parse(label1.Text)];
             bool potShow = false;
 
             string _PlayerName;
@@ -1241,9 +1243,14 @@ namespace PMReplay
                     GC.Collect();
                     Application.DoEvents();
                 }
-                
+                Global.playerStack[numberOfHandsPlayed] = playerStack;
+
             }
-            MessageBox.Show($"{playerName} played {numberOfHandsPlayed} hands with total add-ons of {totalAddOns:C2}");
+            //MessageBox.Show($"{playerName} played {numberOfHandsPlayed} hands with total add-ons of {totalAddOns:C2}");
+            
+            //show form2 with the chart
+
+            
         }
 
         private void SeatPlayer_DoubleClick(object sender, EventArgs e)
