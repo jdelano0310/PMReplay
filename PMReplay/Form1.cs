@@ -1099,5 +1099,143 @@ namespace PMReplay
 
         }
 
+        private void CalculatePlayerStackMovement(String seatNumber, String playerName)
+        {
+            // for the entire session, show the selected player's stack size change hand by hand
+            bool potShow = false;
+
+            string _PlayerName;
+            double playerStack = 0;
+            bool summaryLineReached = false;
+            String seatName = $"Seat {seatNumber}";
+
+            foreach (Hand hand in hands) {
+                potShow = false;
+                summaryLineReached = false;
+
+                // during an round of betting keep track of the previous bet in case the player raises a raise 
+                // only deduct the difference from their last bet to the current raise amount
+                PlayersPrevBet = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+                foreach (String line in hand.HandLines)
+                {
+                    if (line.Contains("Summary"))
+                    {
+                        summaryLineReached = true;
+                    }
+
+                    if (line.Contains(seatName) && !summaryLineReached)
+                    {
+                        // set the starting stack for the hand
+                        string _StackSize = $"${FindStringInBetween(line, '(', ')')}";
+                        playerStack = double.Parse(_StackSize);
+                    }
+
+                    if (line.Contains("Pot Show Down"))
+                    {
+                        potShow = true;
+                    }
+
+                    if (line.Contains("wins") || line.Contains("splits"))
+                    {
+
+                        _PlayerName = line.Substring(0, (line.IndexOf(' ')));
+                        if (_PlayerName == playerName)
+                        {
+                            string[] fromPot = line.Split(' ');
+                            string amountToStack;
+
+                            if (!potShow)
+                            {
+                                // wins with no show down
+                                amountToStack = fromPot[fromPot.Length - 1];
+                                amountToStack = amountToStack.Substring(1, amountToStack.Length - 2);
+                            }
+                            else
+                            {
+                                // wins with show down
+                                amountToStack = fromPot[3];
+                                amountToStack = amountToStack.Substring(1, amountToStack.Length - 2);
+                            }
+
+                            playerStack += double.Parse(amountToStack);
+
+                        }
+                    }
+
+                    if (line.Contains("refund"))
+                    {
+                        // take the bet back because the other player(s) folded to it
+                        _PlayerName = line.Substring(0, (line.IndexOf(' ')));
+                        if (_PlayerName == playerName)
+                        {
+                            string[] actionLine = line.Split(' ');
+                            string amountFromPot;
+                            if (line.Contains("(All-in"))
+                            {
+                                amountFromPot = actionLine[actionLine.Length - 2];
+                            }
+                            else
+                            {
+                                amountFromPot = actionLine[actionLine.Length - 1];
+                            }
+
+                            // add it bet back to the player's stack
+                            playerStack += double.Parse(amountFromPot);
+                        }
+                    }
+
+                    if (line.Contains("raises") || line.Contains("bets")
+                        || line.Contains("calls") || line.Contains("posts")
+                        || line.Contains("adds"))
+                    {
+
+                        _PlayerName = line.Substring(0, (line.IndexOf(' ')));
+                        
+                        String amount;
+                        if (_PlayerName == playerName)
+                        {
+
+                            // remove the amount from their StackSize
+                            string[] toPot = line.Split(' ');
+                            
+                            if (line.Contains("(All-in") || line.Contains("adds"))
+                            {
+                                amount = toPot[toPot.Length - 2];
+                            }
+                            else
+                            {
+                                amount = toPot[toPot.Length - 1];
+                            }
+
+                            double amountToPot = double.Parse(amount);
+                            if (line.Contains("raises"))
+                            {
+                                // if they raise you must take out the previous bet/posted amount of the
+                                // total raise value 
+                                amountToPot -= PlayersPrevBet[int.Parse(seatNumber)];
+                            }
+
+                            if (line.Contains("adds"))
+                            {
+                                // player adds-on to their stack
+                                playerStack += amountToPot;
+                            }
+                            else
+                            {
+                                playerStack -= amountToPot;
+                            }
+
+                            // save the players last bet in case there is a raise, the code must then 
+                            // only deduct the difference bwteen the prev bet and the current raise
+                            PlayersPrevBet[int.Parse(seatNumber)] = double.Parse(amount);
+                        }
+                    }
+
+                    GC.Collect();
+                    Application.DoEvents();
+                }
+            }
+        }
     }
 }
