@@ -159,7 +159,6 @@ namespace PMReplay
                 lblPlayerName.BackColor = Color.Khaki;
             }
 
-
             lblStackSize.Text = PlayerStack;
 
             lblPlayerName.Visible = true;
@@ -1109,6 +1108,7 @@ namespace PMReplay
 
             string numberOfHandsInFile = label1.Text.Substring(0, label1.Text.IndexOf(' '));
             Global.playerStack = new double[int.Parse(numberOfHandsInFile) + 1];
+            Global.playerAddon = new double[int.Parse(numberOfHandsInFile) + 1];
             bool potShow = false;
 
             string _PlayerName;
@@ -1128,6 +1128,7 @@ namespace PMReplay
 
                 foreach (String line in hand.HandLines)
                 {
+                    totalAddOns = 0;
                     if (line.Contains("Summary"))
                     {
                         summaryLineReached = true;
@@ -1247,6 +1248,7 @@ namespace PMReplay
                     Application.DoEvents();
                 }
                 Global.playerStack[numberOfHandsPlayed] = playerStack;
+                Global.playerAddon[numberOfHandsPlayed] = totalAddOns;
 
             }
             //MessageBox.Show($"{playerName} played {numberOfHandsPlayed} hands with total add-ons of {totalAddOns:C2}");

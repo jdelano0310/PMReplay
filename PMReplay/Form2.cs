@@ -25,20 +25,28 @@ namespace PMReplay
 
         private void BuildSplineChart()
         {
-            StackChart.Series.Clear();
+            //StackChart.Series.Clear();
 
             StackChart.Titles.Add("Stack History");
             StackChart.ChartAreas[0].AxisX.Title = "Hand Number";
             StackChart.ChartAreas[0].AxisY.Title = "Dollars";
 
-            Series series = StackChart.Series.Add("Stack Amount");
-            series.ChartType = SeriesChartType.Spline;
-            
             int handNumber = 0;
+            double handStackTotal = 0;
+            double handAddOn = 0;
             foreach (double handstack in Global.playerStack)
             {
                 handNumber += 1;
-                series.Points.AddXY(handNumber, handstack);
+                handStackTotal = handstack;
+                handAddOn = Global.playerAddon[handNumber];
+                if (handAddOn != 0)
+                {
+                    // back out the amount the player add-on from their total so it can be
+                    // delineated in the bar chart
+                    handStackTotal -= handAddOn;
+                }
+                StackChart.Series["StackTotal"].Points.AddXY(handNumber, handStackTotal);
+                StackChart.Series["AddOn"].Points.AddXY(handNumber, handAddOn);
             }
 
         }

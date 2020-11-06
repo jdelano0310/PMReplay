@@ -9,5 +9,6 @@ namespace PMReplay
     class Global
     {
         public static double[] playerStack;
+        public static double[] playerAddon;
     }
 }
