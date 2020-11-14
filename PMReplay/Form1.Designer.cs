@@ -92,6 +92,8 @@
             this.btnSelectFile = new System.Windows.Forms.Button();
             this.lblGameType = new System.Windows.Forms.Label();
             this.cboHands = new System.Windows.Forms.ComboBox();
+            this.btnViewGraph = new System.Windows.Forms.Button();
+            this.drpPlayerNames = new System.Windows.Forms.ComboBox();
             this.pnlTable.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbPlayer1Card2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbPlayer1Card1)).BeginInit();
@@ -775,11 +777,36 @@
             this.cboHands.Visible = false;
             this.cboHands.SelectedIndexChanged += new System.EventHandler(this.cboHands_SelectedIndexChanged);
             // 
+            // btnViewGraph
+            // 
+            this.btnViewGraph.Location = new System.Drawing.Point(401, 3);
+            this.btnViewGraph.Name = "btnViewGraph";
+            this.btnViewGraph.Size = new System.Drawing.Size(150, 22);
+            this.btnViewGraph.TabIndex = 52;
+            this.btnViewGraph.Text = "View Player Stack Graph";
+            this.btnViewGraph.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.btnViewGraph.UseVisualStyleBackColor = true;
+            this.btnViewGraph.Visible = false;
+            this.btnViewGraph.Click += new System.EventHandler(this.btnViewGraph_Click);
+            // 
+            // drpPlayerNames
+            // 
+            this.drpPlayerNames.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.drpPlayerNames.FormattingEnabled = true;
+            this.drpPlayerNames.Location = new System.Drawing.Point(401, 4);
+            this.drpPlayerNames.Name = "drpPlayerNames";
+            this.drpPlayerNames.Size = new System.Drawing.Size(150, 21);
+            this.drpPlayerNames.TabIndex = 53;
+            this.drpPlayerNames.Visible = false;
+            this.drpPlayerNames.SelectedIndexChanged += new System.EventHandler(this.drpPlayerNames_SelectedIndexChanged);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(964, 600);
+            this.Controls.Add(this.drpPlayerNames);
+            this.Controls.Add(this.btnViewGraph);
             this.Controls.Add(this.btnSelectFile);
             this.Controls.Add(this.lblGameType);
             this.Controls.Add(this.cboHands);
@@ -887,6 +914,8 @@
         private System.Windows.Forms.Button btnSelectFile;
         private System.Windows.Forms.Label lblGameType;
         private System.Windows.Forms.ComboBox cboHands;
+        private System.Windows.Forms.Button btnViewGraph;
+        private System.Windows.Forms.ComboBox drpPlayerNames;
     }
 }
 

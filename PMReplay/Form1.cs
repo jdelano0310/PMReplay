@@ -35,7 +35,7 @@ namespace PMReplay
         String backOfCardImageFile = "";
 
         private List<Hand> hands;
-        String[] PlayersSeatNumber;
+        //String[] PlayersSeatNumber;
         double[] PlayersPrevBet = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
         Label FindSpecificLabel(String controlName)
@@ -82,6 +82,8 @@ namespace PMReplay
             String handTime = "";
             Hand currentHand = null;
 
+            Global.PlayersSeatNumber = new string[10]; // small array for quick seat number reference
+
             hands = new List<Hand>();
 
             // Display the file contents by using a foreach loop.
@@ -114,7 +116,19 @@ namespace PMReplay
                 else
                 {
                     // save each line of the hand history for use if the user selects it from the list
-                    if (currentHandNumber != 0) { handLines.Add(line); }
+                    if (currentHandNumber != 0) { 
+                        handLines.Add(line);
+
+                        if (line.Contains("Seat"))
+                        {
+                            // fill the array that contains which player is in what seat
+                            string seatNumber = line.Substring(5, 1);
+                            string _PlayerName = line.Substring(8, (line.Substring(8).IndexOf("(") - 1));
+
+                            Global.PlayersSeatNumber[int.Parse(seatNumber)] = _PlayerName;
+
+                        }
+                    }
                 }
             }
 
@@ -361,7 +375,7 @@ namespace PMReplay
         private void DisplayChatBubble(String chatLine)
         {
             string _PlayerName = chatLine.Substring(0, (chatLine.IndexOf(' ') -1));
-            string seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
+            string seatNumber = GetSeatNumberUsingPlayerName(_PlayerName);
 
             Label lblPlayerSeat = FindSpecificLabel($"lblSeatPlayer{seatNumber}");
             
@@ -390,6 +404,12 @@ namespace PMReplay
 
         }
 
+        string GetSeatNumberUsingPlayerName(string PlayerName)
+        {
+            string seatNumber = Array.IndexOf(Global.PlayersSeatNumber, PlayerName).ToString();
+            return seatNumber;
+        }
+
         private void ShowHand(int HandNumber)
         {
             String seatNumber = "";
@@ -405,8 +425,6 @@ namespace PMReplay
             bool handIsfinished = false;
             bool holeCardsLineReached = false;
             bool summaryLineReached = false;
-
-            PlayersSeatNumber = new string[9]; // small array for quick seat number reference
 
             // during an round of betting keep track of the previous bet in case the player raises a raise 
             // only deduct the difference from their last bet to the current raise amount
@@ -471,7 +489,7 @@ namespace PMReplay
                     string _StackSize = $"${FindStringInBetween(line, '(', ')')}";
                     bool _PlayerSittingOut = line.Contains("sitting out") || line.Contains("waiting for big blind");
 
-                    PlayersSeatNumber[int.Parse(seatNumber)] = _PlayerName;
+                    Global.PlayersSeatNumber[int.Parse(seatNumber)] = _PlayerName;
 
                     SetPlayerInfo(seatNumber, _PlayerName, _StackSize, _PlayerSittingOut);
 
@@ -488,13 +506,13 @@ namespace PMReplay
                 if (processedSeats && !processedPreDeal)
                 {
                     // preDeal - player position (who is the Button, SB, and BB)
-                    String preDealPlayer = line.Substring(0, line.IndexOf(' '));
+                    String preDealPlayerName = line.Substring(0, line.IndexOf(' '));
                     String preDealPlayerPosition = line.Contains("dealer") ? "D" : line.Contains("small blind")
                                                         ? "SB" : line.Contains("big blind") && !line.Contains("small")
                                                         ? "BB" : line.Contains("small & big blind") ? "SB+BB" :
                                                         line.Contains("straddle") ? "STRDL" : "NF";
 
-                    seatNumber = Array.IndexOf(PlayersSeatNumber, preDealPlayer).ToString();
+                    seatNumber = GetSeatNumberUsingPlayerName(preDealPlayerName);
 
                     if (seatNumber != "-1")
                     {
@@ -508,7 +526,7 @@ namespace PMReplay
                     handIsfinished = true;
 
                     string _PlayerName = line.Substring(0, (line.IndexOf(' ')));
-                    seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
+                    seatNumber = GetSeatNumberUsingPlayerName(_PlayerName);
                     string[] fromPot = line.Split(' ');
                     string amountToStack;
 
@@ -599,7 +617,7 @@ namespace PMReplay
 
                             // add it bet back to the player's stack
                             string _PlayerName = line.Substring(0, (line.IndexOf(' ')));
-                            seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
+                            seatNumber = GetSeatNumberUsingPlayerName(_PlayerName);
 
                             UpdateStackSizeForSeat(seatNumber, amountFromPot, "add");
                             AddLineToHandActionListbox($"{_PlayerName} is refunded {double.Parse(amountFromPot).ToString("C2")}");
@@ -610,7 +628,7 @@ namespace PMReplay
                             AddLineToHandActionListbox(line);
 
                             string _PlayerName = line.Substring(0, (line.IndexOf(' ')));
-                            seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
+                            seatNumber = GetSeatNumberUsingPlayerName(_PlayerName);
                             HighlightActionOnSeat(seatNumber);
                             PlayerFoldsHideCardImages(seatNumber);
 
@@ -630,7 +648,7 @@ namespace PMReplay
                             {
 
                                 string _PlayerName = line.Substring(0, (line.IndexOf(' ')));
-                                seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
+                                seatNumber = GetSeatNumberUsingPlayerName(_PlayerName);
                                 if (seatNumber != "-1")
                                 {
                                     HighlightActionOnSeat(seatNumber);
@@ -723,7 +741,7 @@ namespace PMReplay
                             {
                                 
                                 string _PlayerName = line.Substring(0, (line.IndexOf(' ')));
-                                seatNumber = Array.IndexOf(PlayersSeatNumber, _PlayerName).ToString();
+                                seatNumber = GetSeatNumberUsingPlayerName(_PlayerName);
                                 if (seatNumber != "-1")
                                 {
                                     HighlightActionOnSeat(seatNumber);
@@ -876,6 +894,7 @@ namespace PMReplay
                     tsLBLFileName.Text = $"Hand history file: {dlgHandHistory.FileName}";
                     ReadHandHistoryFile(dlgHandHistory.FileName);
                     cboHands.Visible = true;
+                    btnViewGraph.Visible = true;
                 }
                 catch (Exception ex)
                 {
@@ -919,20 +938,37 @@ namespace PMReplay
             // either on the board or in the players hand
             String directory = AppDomain.CurrentDomain.BaseDirectory;
             String CardImagePath = $"{directory}images\\cards\\";
-                        
+            String suit = "";
+            String CardImg;
+
             if (!Directory.Exists(CardImagePath))
             {
                 throw new System.ArgumentException("Missing card image folder. A folders named 'images\\cards' must exist.");
             }
-            String suit = value.Substring(1) == "s" ? "spades" : value.Substring(1) == "h" ? "hearts"
-                                                : value.Substring(1) == "d" ? "diamonds" : "clubs";
-            String CardImg;
 
             if (backOfCardImageFile.Length==0)
             {
                 backOfCardImageFile = $"{CardImagePath}back.png";
             }
 
+            // assign the full name of the suit
+            switch (value.Substring(1))
+            {
+                case "s":
+                    suit = "spades";
+                    break;
+                case "h":
+                    suit = "hearts";
+                    break;
+                case "d":
+                    suit = "diamonds";
+                    break;
+                case "c":
+                    suit = "clubs";
+                    break;
+            }
+
+            // create the image filename value for each caard in the deck
             switch (value.Substring(0, 1))
             {
                 case "A":
@@ -1009,11 +1045,6 @@ namespace PMReplay
                 };
             }
 
-            //for (int i = 0; i < 52; i++)
-            //{
-            //    lbHands.Items.Add($"card: {deck[i].Value}");
-            //}
-
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -1047,6 +1078,8 @@ namespace PMReplay
 
         void ResetTable()
         {
+            btnViewGraph.Visible = false;
+            drpPlayerNames.Visible = false;
             NextButtonClicked = false;
             btnNext.Visible = false;
 
@@ -1104,6 +1137,7 @@ namespace PMReplay
         private void CalculatePlayerStackMovement(String seatNumber, String playerName)
         {
             // for the entire session, show the selected player's stack size change hand by hand
+            this.UseWaitCursor = true;
             DisplayChatBubble($"{playerName}: Loading stack size data");
 
             string numberOfHandsInFile = label1.Text.Substring(0, label1.Text.IndexOf(' '));
@@ -1116,6 +1150,7 @@ namespace PMReplay
             bool summaryLineReached = false;
             String seatName = $"Seat {seatNumber}";
             double totalAddOns = 0;
+            double amountToPot = 0;
             numberOfHandsPlayed = 0;
 
             foreach (Hand hand in hands) {
@@ -1129,6 +1164,7 @@ namespace PMReplay
                 foreach (String line in hand.HandLines)
                 {
                     totalAddOns = 0;
+                    amountToPot = 0;
                     if (line.Contains("Summary"))
                     {
                         summaryLineReached = true;
@@ -1219,7 +1255,7 @@ namespace PMReplay
                                 amount = toPot[toPot.Length - 1];
                             }
 
-                            double amountToPot = double.Parse(amount);
+                            amountToPot = double.Parse(amount);
                             if (line.Contains("raises"))
                             {
                                 // if they raise you must take out the previous bet/posted amount of the
@@ -1241,14 +1277,17 @@ namespace PMReplay
                             // save the players last bet in case there is a raise, the code must then 
                             // only deduct the difference bwteen the prev bet and the current raise
                             PlayersPrevBet[int.Parse(seatNumber)] = double.Parse(amount);
+
+                            Global.playerAddon[numberOfHandsPlayed] = (line.Contains("adds")) ? amountToPot : 0;
                         }
                     }
 
                     GC.Collect();
                     Application.DoEvents();
+
+                    Global.playerStack[numberOfHandsPlayed] = playerStack;
+                    
                 }
-                Global.playerStack[numberOfHandsPlayed] = playerStack;
-                Global.playerAddon[numberOfHandsPlayed] = totalAddOns;
 
             }
             //MessageBox.Show($"{playerName} played {numberOfHandsPlayed} hands with total add-ons of {totalAddOns:C2}");
@@ -1291,6 +1330,44 @@ namespace PMReplay
             {
                 lbl = FindSpecificLabel($"{lblName}{i}");
                 lbl.DoubleClick += SeatPlayer_DoubleClick;
+            }
+        }
+
+        private void btnViewGraph_Click(object sender, EventArgs e)
+        {
+            // allow the user to select a player to view stak history from the current hand history file
+            btnViewGraph.Visible = false;
+            drpPlayerNames.Items.Clear();
+            drpPlayerNames.Items.Add("Select a player");
+
+            foreach (string playerName in Global.PlayersSeatNumber)
+            {
+                if (playerName != null)
+                {
+                    drpPlayerNames.Items.Add(playerName);
+                }
+            }
+            drpPlayerNames.Items.Add("Exit");
+            drpPlayerNames.SelectedIndex = 0;
+
+            drpPlayerNames.Visible = true;
+        }
+
+        private void drpPlayerNames_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (drpPlayerNames.SelectedIndex > 0)
+            {
+                if (drpPlayerNames.SelectedIndex != drpPlayerNames.Items.Count - 1)
+                {
+                    string playerName = drpPlayerNames.SelectedItem.ToString();
+                    string seatNumber = GetSeatNumberUsingPlayerName(playerName);
+                    CalculatePlayerStackMovement(seatNumber, playerName);
+                } else
+                {
+                    // user selected exit
+                    drpPlayerNames.Visible = true;
+                    btnViewGraph.Visible = true;
+                }
             }
         }
     }

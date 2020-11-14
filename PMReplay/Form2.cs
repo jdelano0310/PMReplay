@@ -20,10 +20,10 @@ namespace PMReplay
 
         private void Form2_Load(object sender, EventArgs e)
         {
-            BuildSplineChart();
+            BuildChart();
         }
 
-        private void BuildSplineChart()
+        private void BuildChart()
         {
             //StackChart.Series.Clear();
 
@@ -36,17 +36,17 @@ namespace PMReplay
             double handAddOn = 0;
             foreach (double handstack in Global.playerStack)
             {
-                handNumber += 1;
-                handStackTotal = handstack;
                 handAddOn = Global.playerAddon[handNumber];
+                handStackTotal = handstack;
                 if (handAddOn != 0)
                 {
-                    // back out the amount the player add-on from their total so it can be
-                    // delineated in the bar chart
+                    // back out the amount the player added-on from their total chip stack so it can be
+                    // represented in the bar chart
                     handStackTotal -= handAddOn;
                 }
                 StackChart.Series["StackTotal"].Points.AddXY(handNumber, handStackTotal);
                 StackChart.Series["AddOn"].Points.AddXY(handNumber, handAddOn);
+                handNumber += 1;
             }
 
         }

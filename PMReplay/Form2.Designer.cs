@@ -38,11 +38,14 @@
             // 
             // StackChart
             // 
+            this.StackChart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             chartArea1.Name = "ChartArea1";
             this.StackChart.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.StackChart.Legends.Add(legend1);
-            this.StackChart.Location = new System.Drawing.Point(0, 24);
+            this.StackChart.Location = new System.Drawing.Point(0, 0);
             this.StackChart.Name = "StackChart";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StackedBar;
@@ -54,7 +57,7 @@
             series2.Name = "AddOn";
             this.StackChart.Series.Add(series1);
             this.StackChart.Series.Add(series2);
-            this.StackChart.Size = new System.Drawing.Size(800, 428);
+            this.StackChart.Size = new System.Drawing.Size(1051, 709);
             this.StackChart.TabIndex = 0;
             this.StackChart.Text = "chart1";
             // 
@@ -62,7 +65,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1051, 707);
             this.Controls.Add(this.StackChart);
             this.Name = "Form2";
             this.Text = "Form2";

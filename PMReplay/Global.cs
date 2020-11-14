@@ -10,5 +10,6 @@ namespace PMReplay
     {
         public static double[] playerStack;
         public static double[] playerAddon;
+        public static string[] PlayersSeatNumber;
     }
 }
